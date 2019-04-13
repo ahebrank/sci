@@ -1,0 +1,25 @@
+{#
+/**
+ * @file static_content.html.twig
+ * Default theme implementation to present Static content data.
+ *
+ * This template is used when viewing Static content pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_static_content()
+ *
+ * @ingroup themeable
+ */
+#}
+{% set iframe_attributes = [
+  'src=' ~ static_url,
+  width? 'width=' ~ width,
+  height? 'height=' ~ height,
+] %}
+<div{{ attributes.addClass('static-content') }}>
+  <iframe {{ iframe_attributes|join(" ") }}></iframe>
+</div>

@@ -1,0 +1,8 @@
+
+# Static content menu items definition
+entity.static_content.collection:
+  title: 'Static content'
+  route_name: entity.static_content.collection
+  description: 'List static content entities'
+  parent: system.admin_structure
+  weight: 100

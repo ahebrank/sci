@@ -1,0 +1,5 @@
+entity.static_content.add_form:
+  route_name: entity.static_content.add_form
+  title: 'Add static content'
+  appears_on:
+    - entity.static_content.collection

@@ -1,0 +1,5 @@
+name: 'Static Content Iframe'
+type: module
+description: 'Make static content available in iframes'
+core: 8.x
+package: 'Custom'

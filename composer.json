@@ -1,0 +1,14 @@
+{
+  "name": "drupal/sci",
+  "type": "drupal-module",
+  "description": "Make static content available in iframes",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/sci",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/sci",
+    "source": "http://cgit.drupalcode.org/sci"
+  },
+  "require": { }
+}

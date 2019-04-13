@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Contains sci.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Component\Utility\Html;
+
+/**
+ * Implements hook_help().
+ */
+function sci_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the sci module.
+    case 'help.page.sci':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Make static content available in iframes') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sci_theme() {
+  return [
+    'static_content' => [
+      'render element' => 'elements',
+      'file' => 'static-content.theme.inc',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function sci_theme_suggestions_static_content(array $variables) {
+  $static_content = $variables['elements']['#static_content'];
+  $safe_name = str_replace('-', '_', Html::getClass($static_content->getName()));
+  return [
+    'static_content__' . $safe_name,
+  ];
+}

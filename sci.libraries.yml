@@ -1,0 +1,9 @@
+static-content:
+  css:
+    component:
+      css/static-content.css: {}
+autoheight:
+  js:
+    js/autoheight.js: {}
+  dependencies:
+    - core/jquery

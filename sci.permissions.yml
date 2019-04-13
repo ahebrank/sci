@@ -1,0 +1,15 @@
+add static content entities:
+  title: 'Create new Static content entities'
+
+administer static content entities:
+  title: 'Administer Static content entities'
+  restrict access: true
+
+delete static content entities:
+  title: 'Delete Static content entities'
+
+edit static content entities:
+  title: 'Edit Static content entities'
+
+view static content entities:
+  title: 'View Static content entities'

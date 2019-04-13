@@ -1,0 +1,17 @@
+# Static content routing definition
+entity.static_content.canonical:
+  route_name: entity.static_content.canonical
+  base_route: entity.static_content.canonical
+  title: 'View'
+
+entity.static_content.edit_form:
+  route_name: entity.static_content.edit_form
+  base_route: entity.static_content.canonical
+  title: 'Edit'
+
+entity.static_content.delete_form:
+  route_name:  entity.static_content.delete_form
+  base_route:  entity.static_content.canonical
+  title: Delete
+  weight: 10
+
