@@ -35,38 +35,18 @@ class StaticContentForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
+  public function save(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
+
+    parent::save($form, $form_state);
 
     $archive_fid = $form_state->getValue(['static_archive', '0']);
     // @TODO: inject this service.
     if (!empty($archive_fid) && $file = \Drupal::entityTypeManager()->getStorage('file')->load($archive_fid)) {
-      $entity->saveZip($file);
+      if ($entity->saveZip($file)) {
+        $form_state->setRedirect('entity.static_content.canonical', ['static_content' => $entity->id()]);
+      }
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function save(array $form, FormStateInterface $form_state) {
-    $entity = $this->entity;
-
-    $status = parent::save($form, $form_state);
-
-    switch ($status) {
-      case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label Static content.', [
-          '%label' => $entity->label(),
-        ]));
-        break;
-
-      default:
-        drupal_set_message($this->t('Saved the %label Static content.', [
-          '%label' => $entity->label(),
-        ]));
-    }
-    $form_state->setRedirect('entity.static_content.canonical', ['static_content' => $entity->id()]);
   }
 
 }
