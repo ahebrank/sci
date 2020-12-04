@@ -33,7 +33,7 @@ class StaticContentForm extends ContentEntityForm {
       '#type' => 'managed_file',
       '#title' => $this->t('Static content archive'),
       '#title' => $this->t('Upload a zip file of your static content. Should contain an index.html entrypoint.'),
-      '#upload_location' => 'temporary://',
+      '#upload_location' => 'public://static_tmp',
       '#upload_validators' => [
         'file_validate_extensions' => ['zip'],
       ],
@@ -55,10 +55,7 @@ class StaticContentForm extends ContentEntityForm {
       // Remove any file already there.
       StaticContent::cleanOldContent($entity->getBaseUri());
 
-      if ($ops = $this->getZipOps($entity, $file)) {
-        $entity->save();
-        $form_state->setRedirect('entity.static_content.canonical', ['static_content' => $entity->id()]);
-
+      if ($ops = $this->getZipOps($entity, $file, $form_state)) {
         batch_set([
           'title' => $this->t('Extracting zip files'),
           'operations' => $ops,
@@ -71,19 +68,18 @@ class StaticContentForm extends ContentEntityForm {
   /**
    * Create the static zip.
    */
-  protected function getZipOps($entity, File $file) {
+  protected function getZipOps($entity, File $file, FormStateInterface $form_state) {
     // @TODO: inject
-    $real_path = \Drupal::service('file_system')->realpath($file->getFileUri());
-    $zip = new Zip($real_path);
+    $zip = new Zip(\Drupal::service('file_system')->realpath($file->getFileUri()));
     if ($zip) {
       $zip_files = $zip->listContents();
 
       // Attempt to find an index.html file.
       $index_path = "";
-      foreach ($zip_files as $file) {
-        $basename = basename($file);
+      foreach ($zip_files as $zip_file) {
+        $basename = basename($zip_file);
         if ($basename === 'index.html') {
-          $index_path = $file;
+          $index_path = $zip_file;
           break;
         }
       }
@@ -105,18 +101,21 @@ class StaticContentForm extends ContentEntityForm {
       foreach ($sets as $set) {
         $ops[] = [
           '\Drupal\sci\Form\StaticContentForm::extractSet',
-          [$real_path, $base_uri, $set, $set_count],
+          [$file, $base_uri, $set, $set_count],
         ];
       }
-      // $ops[] = [
-      //   '\Drupal\sci\Form\StaticContentForm::extractSet',
-      //   [$real_path, $base_uri, $zip_files, 1],
-      // ];
 
-      // Set new path info.
-      $entity->set('base_uri', $base_uri);
-      $url = $base_uri . '/' . $index_path;
-      $entity->set('url', $url);
+      // Update the entity.
+      $ops[] = [
+        '\Drupal\sci\Form\StaticContentForm::updateEntityPath',
+        [$entity, $base_uri, $index_path, $form_state],
+      ];
+
+      // Remove the original zip.
+      $ops[] = [
+        '\Drupal\sci\Form\StaticContentForm::deleteFile',
+        [$file],
+      ];
 
       return $ops;
     }
@@ -142,8 +141,10 @@ class StaticContentForm extends ContentEntityForm {
   /**
    * Extraction callback.
    */
-  public static function extractSet($zip_path, $path, $files, $set_count, &$context) {
-    $zip = new Zip($zip_path);
+  public static function extractSet(File $file, $path, $files, $set_count, &$context) {
+    // @TODO: inject
+    $zip = new Zip(\Drupal::service('file_system')->realpath($file->getFileUri()));
+
     if (!isset($context['sandbox']['progress'])) {
       $context['sandbox']['progress'] = 0;
       $context['results'] = [];
@@ -170,6 +171,26 @@ class StaticContentForm extends ContentEntityForm {
     if ($context['sandbox']['progress'] != $set_count) {
       $context['finished'] = $context['sandbox']['progress'] / $set_count;
     }
+  }
+
+  /**
+   * Callback to update the entity with the new path info.
+   */
+  public static function updateEntityPath($entity, $base_uri, $index_path, FormStateInterface $form_state) {
+    // Set new path info.
+    $entity->set('base_uri', $base_uri);
+    $url = $base_uri . '/' . $index_path;
+    $entity->set('url', $url);
+    $entity->save();
+
+    $form_state->setRedirect('entity.static_content.canonical', ['static_content' => $entity->id()]);
+  }
+
+  /**
+   * Callback to delete a file.
+   */
+  public static function deleteFile(File $file) {
+    $file->delete();
   }
 
   /**
