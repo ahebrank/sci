@@ -2,6 +2,7 @@
 
 namespace Drupal\sci\Form;
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
@@ -86,7 +87,7 @@ class StaticContentForm extends ContentEntityForm {
 
       // Base URI is a hash of all the files in the archive.
       $base_uri = "public://static/" . md5($entity->id() . '|' . implode('|', $zip_files));
-      if (!file_prepare_directory($base_uri, FILE_CREATE_DIRECTORY)) {
+      if (!\Drupal::service('file_system')->prepareDirectory($base_uri, FileSystemInterface::CREATE_DIRECTORY)) {
         $message = $this->t('Unable to create directory: @dir', [
           '@dir' => $base_uri,
         ]);
